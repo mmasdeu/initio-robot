@@ -68,11 +68,11 @@ with robotclass.RobotResource() as robot:
             robot.stop()
             speed = 0
             continue
-        if key == 'x' or key == '.':
+        if key == ord('x') or key == ord('.'):
             robot.stop()
-        if key == 'w' or ord(key) == 16: # Advance
+        if key == ord('w') or key == curses.KEY_UP: # Advance
             speed += accel
-        elif key == 's' or ord(key) == 18: # Reverse
+        elif key == ord('s') or key == curses.KEY_DOWN: # Reverse
             speed -= accel
         else:
             if speed > 0:
@@ -83,12 +83,10 @@ with robotclass.RobotResource() as robot:
                 speed += accel
                 if speed > 0:
                     speed = 0
-        if key == 'a' or ord(key) == 19: # Left
+        if key == ord('a') or key == curses.KEY_LEFT: # Left
             robot.spinLeft(50)
-        if key == 'd' or ord(key) == 17: # Right
+        if key == ord('d') or key == curses.KEY_RIGHT: # Right
             robot.spinRight(50)
-        if ord(key) == 3:
-            break
         if speed >  100:
             speed = 100
         elif speed < -100:
