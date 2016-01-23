@@ -8,6 +8,9 @@ import termios
 import argparse
 import logging
 import time
+import curses
+
+
 
 parser = argparse.ArgumentParser(
     description='Initio Ultimate Robot'
@@ -50,16 +53,22 @@ def readkey(getchar_fn=None):
 import robotclass
 accel = 5
 speed = 0
+damn = curses.initscr()
+damn.nodelay(1) # doesn't keep waiting for a key press
+damn.keypad(1) # i.e. arrow keys
+curses.noecho() # stop keys echoing
+key = 0
+damn.addstr(0, 0, "q to quit - only the up and down arrow keys do anything")
 with robotclass.RobotResource() as robot:
-    while True:
+    while key != ord('q'):
+        key = damn.getch()
         if robot.irAll():
             robot.reverse(100)
             time.sleep(0.3)
             robot.stop()
             speed = 0
             continue
-        key = readkey()
-        if key ==' x' or key == '.':
+        if key == 'x' or key == '.':
             robot.stop()
         if key == 'w' or ord(key) == 16: # Advance
             speed += accel
@@ -85,3 +94,4 @@ with robotclass.RobotResource() as robot:
         elif speed < -100:
             speed = -100
         robot.move(speed)
+curses.endwin()
