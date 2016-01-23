@@ -121,6 +121,13 @@ class RobotResource():
                 self._q.ChangeFrequency(speed + 5)
                 self._b.ChangeFrequency(speed + 5)
 
+            # move(speed): Sets both motors to move forward (if speed > 0) or reverse (if speed < 0). -100 <= speed <= 100
+            def move(self, speed):
+                if speed >= 0:
+                    self.forward(speed)
+                else:
+                    self.reverse(-speed)
+
             # spinLeft(speed): Sets motors to turn opposite directions at speed. 0 <= speed <= 100
             def spinLeft(self, speed):
                 self._p.ChangeDutyCycle(0)
@@ -228,6 +235,7 @@ class RobotResource():
                 if not self._servosActive:
                     self.startServos()
                 self.pinServod(Servo, Degrees) # for now, simply pass on the input values
+
             def stopServos(self):
                 debug("Stopping servo")
                 self.stopServod()

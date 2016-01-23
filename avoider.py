@@ -53,30 +53,35 @@ speed = 0
 with robotclass.RobotResource() as robot:
     while True:
         if robot.irAll():
-            robot.reverse(10)
-            time.sleep(1)
+            robot.reverse(100)
+            time.sleep(0.3)
             robot.stop()
+            speed = 0
             continue
         key = readkey()
         if key ==' x' or key == '.':
             robot.stop()
-        elif key == 'w' or ord(key) == 16:
+        if key == 'w' or ord(key) == 16: # Advance
             speed += accel
-        elif key == 'a' or ord(key) == 19:
-            speed = 0
-            robot.spinLeft(50)
-        elif key == 's' or ord(key) == 18:
+        elif key == 's' or ord(key) == 18: # Reverse
             speed -= accel
-        elif key == 'a' or ord(key) == 17:
-            speed = 0
+        else:
+            if speed > 0:
+                speed -= accel
+                if speed < 0:
+                    speed = 0
+            elif speed < 0:
+                speed += accel
+                if speed > 0:
+                    speed = 0
+        if key == 'a' or ord(key) == 19: # Left
+            robot.spinLeft(50)
+        if key == 'd' or ord(key) == 17: # Right
             robot.spinRight(50)
-        elif ord(key) == 3:
+        if ord(key) == 3:
             break
         if speed >  100:
             speed = 100
         elif speed < -100:
             speed = -100
-        if speed > 0:
-            robot.forward(speed)
-        elif speed < 0:
-            robot.reverse(-speed)
+        robot.move(speed)
