@@ -10,8 +10,6 @@ import logging
 import time
 import curses
 
-
-
 parser = argparse.ArgumentParser(
     description='Initio Ultimate Robot'
 )
@@ -24,49 +22,30 @@ if args.verbose:
 
 from logging import debug
 
-def readchar():
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    if ch == '0x03':
-        raise KeyboardInterrupt
-    return ch
-
-def readkey(getchar_fn=None):
-    getchar = getchar_fn or readchar
-    c1 = getchar()
-    if ord(c1) != 0x1b:
-        return c1
-    c2 = getchar()
-    if ord(c2) != 0x5b:
-        return c1
-    c3 = getchar()
-    return chr(0x10 + ord(c3) - 65)  # 16=Up, 17=Down, 18=Right, 19=Left arrows
-
 # End of single character reading
 #======================================================================
 
 import robotclass
-accel = 5
+accel = 20
 speed = 0
 damn = curses.initscr()
 damn.nodelay(1) # doesn't keep waiting for a key press
 damn.keypad(1) # i.e. arrow keys
 curses.noecho() # stop keys echoing
+
 key = 0
-damn.addstr(0, 0, "q to quit - only the up and down arrow keys do anything")
+damn.addstr(0, 0, "q to quit")
 with robotclass.RobotResource() as robot:
     while key != ord('q'):
-        key = damn.getch()
-        if robot.irAll():
-            robot.reverse(100)
-            time.sleep(0.3)
-            robot.stop()
+        key = int(damn.getch())
+        curses.flushinp()
+        if key != -1:
+            damn.addstr(0, 0, "\n %s"%str(key))
+        while robot.irAll():
             speed = 0
+            robot.reverse(50)
+            time.sleep(float(0.2))
+            robot.stop()
             continue
         if key == ord('x') or key == ord('.'):
             robot.stop()
@@ -84,12 +63,20 @@ with robotclass.RobotResource() as robot:
                 if speed > 0:
                     speed = 0
         if key == ord('a') or key == curses.KEY_LEFT: # Left
-            robot.spinLeft(50)
+            robot.spinLeft(80)
+            time.sleep(float(.5))
         if key == ord('d') or key == curses.KEY_RIGHT: # Right
-            robot.spinRight(50)
+            robot.spinRight(80)
+            time.sleep(float(.5))
         if speed >  100:
             speed = 100
         elif speed < -100:
             speed = -100
-        robot.move(speed)
-curses.endwin()
+        if key == ord('q'):
+            break
+        key = -1
+        damn.addstr(0, 0, "speed = %s"%speed)
+        if speed != 0:
+            robot.move(speed)
+            time.sleep(0.1)
+    curses.endwin()
